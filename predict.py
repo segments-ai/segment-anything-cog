@@ -17,42 +17,41 @@ class Predictor(cog.BasePredictor):
         device = "cpu"  # or "cuda"
 
         base_sam_checkpoint = "sam_vit_b_01ec64.pth"  # 375 MB
-        large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
-        huge_sam_checkpoint = "sam_vit_h_4b8939.pth"  # 2.56 GB
+        # large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
+        # huge_sam_checkpoint = "sam_vit_h_4b8939.pth"  # 2.56 GB
 
         base_sam = segment_anything.sam_model_registry["vit_b"](
             checkpoint=base_sam_checkpoint
         )
-        large_sam = segment_anything.sam_model_registry["vit_l"](
-            checkpoint=large_sam_checkpoint
-        )
-        huge_sam = segment_anything.sam_model_registry["vit_h"](
-            checkpoint=huge_sam_checkpoint
-        )
+        # large_sam = segment_anything.sam_model_registry["vit_l"](
+        #     checkpoint=large_sam_checkpoint
+        # )
+        # huge_sam = segment_anything.sam_model_registry["vit_h"](
+        #     checkpoint=huge_sam_checkpoint
+        # )
 
         base_sam.to(device=device)
-        large_sam.to(device=device)
-        huge_sam.to(device=device)
+        # large_sam.to(device=device)
+        # huge_sam.to(device=device)
 
         self.base_predictor = segment_anything.SamPredictor(base_sam)
-        self.large_predictor = segment_anything.SamPredictor(large_sam)
-        self.huge_predictor = segment_anything.SamPredictor(huge_sam)
+        # self.large_predictor = segment_anything.SamPredictor(large_sam)
+        # self.huge_predictor = segment_anything.SamPredictor(huge_sam)
 
     def predict(
         self,
         image_path: cog.Path = cog.Input(description="Input image"),
         model_size: str = cog.Input(
             default="base",
-            description="The model size (one of 'base', 'large' or 'huge').",
+            description="The model size.",
+            choices=["base", "large", "huge"],
         ),
         resize_width: int = cog.Input(
             default=1024,
             description="The width to resize the image to before running inference.",
         ),
-    ) -> cog.Path:
+    ) -> str:
         """Generate an image embedding."""
-        # Note: cannot use typing.Literal['base', 'large', 'huge'] because it's not supported on Replicate.
-
         # Resize image to requested width.
         image = cv2.imread(str(image_path))
         image = imutils.resize(image, width=resize_width)
