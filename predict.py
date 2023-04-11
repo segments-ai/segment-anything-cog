@@ -4,6 +4,7 @@
 from cog import BasePredictor, Input, Path
 from segment_anything import sam_model_registry, SamPredictor
 import sys
+import json
 
 sys.path.append("..")
 import cv2
@@ -12,7 +13,7 @@ import numpy as np
 
 
 class Predictor(BasePredictor):
-    def setup(self):
+    def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient."""
         sam_checkpoint = "sam_vit_h_4b8939.pth"
         device = "cuda"
@@ -28,7 +29,7 @@ class Predictor(BasePredictor):
             default=1024,
             description="The width to resize the image to before running inference.",
         ),
-    ) -> np.ndarray:
+    ) -> Path:
         """Generate an image embedding."""
 
         # Resize image to requested width.
@@ -40,4 +41,9 @@ class Predictor(BasePredictor):
         # Output shape is (1, 256, 64, 64).
         image_embedding = self.predictor.get_image_embedding().cpu().numpy()
 
-        return image_embedding
+        # Save output to disk as json.
+        output = Path("image_embedding.json")
+        with open("image_embedding.json", "w") as f:
+            json.dump(image_embedding.tolist(), f)
+
+        return output
