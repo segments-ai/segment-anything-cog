@@ -1,35 +1,34 @@
 # Prediction interface for Cog ⚙️
 # https://github.com/replicate/cog/blob/main/docs/python.md
 
-from cog import BasePredictor, Input, Path
-from segment_anything import sam_model_registry, SamPredictor
+import cog
+import segment_anything
 import sys
 import json
-
-sys.path.append("..")
 import cv2
 import imutils
-import numpy as np
+
+sys.path.append("..")
 
 
-class Predictor(BasePredictor):
+class Predictor(cog.BasePredictor):
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient."""
         sam_checkpoint = "sam_vit_h_4b8939.pth"
         device = "cuda"
         model_type = "default"
-        sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
+        sam = segment_anything.sam_model_registry[model_type](checkpoint=sam_checkpoint)
         sam.to(device=device)
-        self.predictor = SamPredictor(sam)
+        self.predictor = segment_anything.SamPredictor(sam)
 
     def predict(
         self,
-        image: Path = Input(description="Input image"),
-        resize_width: int = Input(
+        image: cog.Path = cog.Input(description="Input image"),
+        resize_width: int = cog.Input(
             default=1024,
             description="The width to resize the image to before running inference.",
         ),
-    ) -> Path:
+    ) -> cog.Path:
         """Generate an image embedding."""
 
         # Resize image to requested width.
@@ -42,7 +41,7 @@ class Predictor(BasePredictor):
         image_embedding = self.predictor.get_image_embedding().cpu().numpy()
 
         # Save output to disk as json.
-        output = Path("image_embedding.json")
+        output = cog.Path("image_embedding.json")
         with open("image_embedding.json", "w") as f:
             json.dump(image_embedding.tolist(), f)
 
