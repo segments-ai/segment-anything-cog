@@ -17,26 +17,26 @@ class Predictor(cog.BasePredictor):
         device = "cpu"  # or "cuda"
 
         base_sam_checkpoint = "sam_vit_b_01ec64.pth"  # 375 MB
-        # large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
-        # huge_sam_checkpoint = "sam_vit_h_4b8939.pth"  # 2.56 GB
+        large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
+        huge_sam_checkpoint = "sam_vit_h_4b8939.pth"  # 2.56 GB
 
         base_sam = segment_anything.sam_model_registry["vit_b"](
             checkpoint=base_sam_checkpoint
         )
-        # large_sam = segment_anything.sam_model_registry["vit_l"](
-        #     checkpoint=large_sam_checkpoint
-        # )
-        # huge_sam = segment_anything.sam_model_registry["vit_h"](
-        #     checkpoint=huge_sam_checkpoint
-        # )
+        large_sam = segment_anything.sam_model_registry["vit_l"](
+            checkpoint=large_sam_checkpoint
+        )
+        huge_sam = segment_anything.sam_model_registry["vit_h"](
+            checkpoint=huge_sam_checkpoint
+        )
 
         base_sam.to(device=device)
-        # large_sam.to(device=device)
-        # huge_sam.to(device=device)
+        large_sam.to(device=device)
+        huge_sam.to(device=device)
 
         self.base_predictor = segment_anything.SamPredictor(base_sam)
-        # self.large_predictor = segment_anything.SamPredictor(large_sam)
-        # self.huge_predictor = segment_anything.SamPredictor(huge_sam)
+        self.large_predictor = segment_anything.SamPredictor(large_sam)
+        self.huge_predictor = segment_anything.SamPredictor(huge_sam)
 
     def predict(
         self,
