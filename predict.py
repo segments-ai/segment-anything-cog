@@ -14,19 +14,18 @@ class Predictor(cog.BasePredictor):
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient."""
         device = "cpu"  # or "cuda"
-        model_type = "default"
 
         base_sam_checkpoint = "sam_vit_b_01ec64.pth"  # 375 MB
         large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
         huge_sam_checkpoint = "sam_vit_h_4b8939.pth"  # 2.56 GB
 
-        base_sam = segment_anything.sam_model_registry[model_type](
+        base_sam = segment_anything.sam_model_registry["vit_b"](
             checkpoint=base_sam_checkpoint
         )
-        large_sam = segment_anything.sam_model_registry[model_type](
+        large_sam = segment_anything.sam_model_registry["vit_l"](
             checkpoint=large_sam_checkpoint
         )
-        huge_sam = segment_anything.sam_model_registry[model_type](
+        huge_sam = segment_anything.sam_model_registry["vit_h"](
             checkpoint=huge_sam_checkpoint
         )
 
@@ -42,7 +41,7 @@ class Predictor(cog.BasePredictor):
         self,
         image_path: cog.Path = cog.Input(description="Input image"),
         model_size: str = cog.Input(
-            default="huge",
+            default="base",
             description="The model size (one of 'base', 'large' or 'huge').",
         ),
         resize_width: int = cog.Input(
