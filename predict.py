@@ -6,6 +6,7 @@ import segment_anything
 import sys
 import cv2
 import imutils
+import json
 
 sys.path.append("..")
 
@@ -50,6 +51,7 @@ class Predictor(cog.BasePredictor):
         ),
     ) -> cog.Path:
         """Generate an image embedding."""
+        # Note: cannot use typing.Literal['base', 'large', 'huge'] because it's not supported on Replicate.
 
         # Resize image to requested width.
         image = cv2.imread(str(image_path))
@@ -66,6 +68,7 @@ class Predictor(cog.BasePredictor):
         # Run model.
         self.predictor.set_image(image)
         # Output shape is (1, 256, 64, 64).
-        image_embedding = self.predictor.get_image_embedding().cpu().numpy().tolist()
+        image_embedding = self.predictor.get_image_embedding().cpu().numpy()
+        output = json.dumps(image_embedding.tolist())
 
-        return image_embedding
+        return output
