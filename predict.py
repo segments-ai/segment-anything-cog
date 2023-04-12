@@ -6,7 +6,8 @@ import segment_anything
 import sys
 import cv2
 import imutils
-import json
+import numpy as np
+import base64
 
 sys.path.append("..")
 
@@ -43,20 +44,20 @@ class Predictor(cog.BasePredictor):
         image_path: cog.Path = cog.Input(description="Input image"),
         model_size: str = cog.Input(
             default="base",
-            description="The model size.",
+            description="Model size",
             choices=["base", "large", "huge"],
         ),
         resize_width: int = cog.Input(
             default=1024,
-            description="The width to resize the image to before running inference.",
+            description="Width to resize image to before running inference",
         ),
     ) -> str:
         """Generate an image embedding."""
-        # Resize image to requested width.
+        # Resize image to requested width
         image = cv2.imread(str(image_path))
         image = imutils.resize(image, width=resize_width)
 
-        # Select model size.
+        # Select model size
         if model_size == "base":
             self.predictor = self.base_predictor
         elif model_size == "large":
@@ -64,10 +65,16 @@ class Predictor(cog.BasePredictor):
         elif model_size == "huge":
             self.predictor = self.huge_predictor
 
-        # Run model.
+        # Run model
         self.predictor.set_image(image)
         # Output shape is (1, 256, 64, 64).
         image_embedding = self.predictor.get_image_embedding().cpu().numpy()
-        output = json.dumps(image_embedding.tolist())
 
-        return output
+        # Flatten the array to a 1D array
+        flat_arr = image_embedding.flatten()
+        # Convert the 1D array to bytes
+        bytes_arr = flat_arr.astype(np.float32).tobytes()
+        # Encode the bytes to base64
+        base64_str = base64.b64encode(bytes_arr).decode("utf-8")
+
+        return base64_str
