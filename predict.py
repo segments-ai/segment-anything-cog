@@ -8,6 +8,7 @@ import cv2
 import imutils
 import numpy as np
 import base64
+import torch
 
 sys.path.append("..")
 
@@ -15,7 +16,7 @@ sys.path.append("..")
 class Predictor(cog.BasePredictor):
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient."""
-        device = "cpu"  # or "cuda"
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
         base_sam_checkpoint = "sam_vit_b_01ec64.pth"  # 375 MB
         large_sam_checkpoint = "sam_vit_l_0b3195.pth"  # 1.25 GB
