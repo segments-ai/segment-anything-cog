@@ -5,7 +5,6 @@ import cog
 import segment_anything
 import sys
 import cv2
-import imutils
 import numpy as np
 import base64
 import torch
@@ -48,15 +47,10 @@ class Predictor(cog.BasePredictor):
             description="Model size",
             choices=["base", "large", "huge"],
         ),
-        resize_width: int = cog.Input(
-            default=1024,
-            description="Width to resize image to before running inference",
-        ),
     ) -> str:
         """Generate an image embedding."""
-        # Resize image to requested width
+
         image = cv2.imread(str(image_path))
-        image = imutils.resize(image, width=resize_width)
 
         # Select model size
         if model_size == "base":
@@ -68,7 +62,7 @@ class Predictor(cog.BasePredictor):
 
         # Run model
         self.predictor.set_image(image)
-        # Output shape is (1, 256, 64, 64).
+        # Output shape is (1, 256, 64, 64)
         image_embedding = self.predictor.get_image_embedding().cpu().numpy()
 
         # Flatten the array to a 1D array
